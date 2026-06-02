@@ -80,7 +80,11 @@ async function init() {
   initSounds();
   await loadImages();
   initUI();
+  // startLevel se llama desde btn-game-start tras la intro
+  // Preparamos el estado base sin mostrar intro de nivel todavía
   startLevel(1);
+  // Ocultar intro de nivel: el game-intro-overlay ya está visible
+  document.getElementById('intro-overlay').classList.add('hidden');
 
   // Música de fondo al primer toque (reintenta hasta que el navegador la permita)
   function startMusic() {

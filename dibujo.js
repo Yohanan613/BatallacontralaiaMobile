@@ -206,7 +206,7 @@ function drawEnemies(now) {
 
     // Punto amarillo en la posición lógica exacta (sin bob)
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.arc(x, y, 2, 0, Math.PI * 2);
     ctx.fillStyle   = '#FFD700';
     ctx.shadowBlur  = 10;
     ctx.shadowColor = '#FFD700';
@@ -240,10 +240,10 @@ function drawRocket() {
   ctx.translate(r.px, r.py);
   ctx.rotate(angle);
   if (img) {
-    ctx.drawImage(img, -rW / 2, -rH / 2, rW, rH);
+    ctx.drawImage(img, -rW, -rH / 2, rW, rH);  // extremo derecho (nariz) en (0,0)
   } else {
     ctx.fillStyle = '#38b5ff';
-    ctx.fillRect(-12, -5, 24, 10);
+    ctx.fillRect(-24, -5, 24, 10);
   }
   ctx.restore();
 }
@@ -258,7 +258,7 @@ function drawNearMisses(now) {
     // Sigue al cohete si sigue en vuelo, si no usa la posición guardada
     const baseX = ST.rocket ? ST.rocket.px : nm.x;
     const baseY = ST.rocket ? ST.rocket.py : nm.y;
-    const px    = baseX + 48;   // a la derecha del cohete
+    const px    = baseX + 22;   // justo al lado derecho del cohete
     const py    = baseY;
 
     ctx.save();

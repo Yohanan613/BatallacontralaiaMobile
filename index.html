@@ -26,18 +26,6 @@
   </div>
 </div>
 
-<!-- Confirmación de reinicio -->
-<div id="confirm-overlay" class="overlay hidden">
-  <div class="card confirm-card">
-    <div class="card-title">¿Reiniciar juego?</div>
-    <div class="card-desc">Volverás al Nivel 1 y se perderá todo el progreso.</div>
-    <div class="win-btns">
-      <button id="btn-confirm-no"  class="btn-secondary">Cancelar</button>
-      <button id="btn-confirm-yes" class="btn-primary">Reiniciar</button>
-    </div>
-  </div>
-</div>
-
 <!-- Canvas del juego -->
 <canvas id="game-canvas"></canvas>
 
@@ -47,36 +35,43 @@
 <!-- Panel de fórmula -->
 <div id="panel">
 
-  <!-- Tabs de tipo de función (solo nivel 4) -->
+  <!-- Tabs (solo nivel 4) -->
   <div id="type-tabs" class="hidden">
     <button class="tab-btn active" data-type="lineal">Lineal</button>
     <button class="tab-btn" data-type="cuadratica">Cuadrática</button>
     <button class="tab-btn" data-type="exponencial">Exponencial</button>
   </div>
 
-  <!-- Editors estructurados -->
+  <!-- Vista previa de la fórmula (parte superior del panel) -->
+  <div id="formula-preview" class="formula-preview-box"></div>
+
+  <!-- Inputs y sign buttons ocultos (estado interno) -->
+  <div id="hidden-inputs">
+    <input type="number" id="a-lin" value="1"  step="0.5">
+    <input type="number" id="b-lin" value="0"  step="0.5">
+    <input type="number" id="a-cua" value="1"  step="0.5">
+    <input type="number" id="b-cua" value="0"  step="0.5">
+    <input type="number" id="c-cua" value="0"  step="0.5">
+    <input type="number" id="a-exp" value="2"  step="0.5" min="0.1">
+    <input type="number" id="c-exp" value="0"  step="0.1">
+    <button id="sga-lin">+</button>
+    <button id="sg-lin">+</button>
+    <button id="sga-cua">+</button>
+    <button id="sg1-cua">+</button>
+    <button id="sg2-cua">+</button>
+    <button id="sg-exp">+</button>
+  </div>
+
+  <!-- Editores estructurados: botones de coeficientes -->
   <div id="struct-editors">
 
-    <!-- Lineal: a·x ± b -->
+    <!-- Lineal -->
     <div id="ed-lineal" class="ed-block">
-      <div class="coef-row">
-        <button class="sign-btn" id="sga-lin">+</button>
-        <div class="coef-wrap">
-          <span class="coef-lbl">a</span>
-          <button class="step-btn" data-for="a-lin" data-delta="0.5">+</button>
-          <input type="number" id="a-lin" class="coef-in" value="1" step="0.5">
-          <button class="step-btn" data-for="a-lin" data-delta="-0.5">−</button>
-        </div>
-        <span class="op-txt">· x</span>
-        <button class="sign-btn" id="sg-lin">+</button>
-        <div class="coef-wrap">
-          <span class="coef-lbl">b</span>
-          <button class="step-btn" data-for="b-lin" data-delta="0.5">+</button>
-          <input type="number" id="b-lin" class="coef-in" value="0" step="0.5">
-          <button class="step-btn" data-for="b-lin" data-delta="-0.5">−</button>
-        </div>
+      <div class="coef-btns-row">
+        <button class="coef-btn" data-coef="a-lin" id="cbt-a-lin">a = 1</button>
+        <span class="op-txt-sm">·x</span>
+        <button class="coef-btn" data-coef="b-lin" id="cbt-b-lin">+ b = 0</button>
       </div>
-      <div class="preview-box" id="prev-lin"></div>
       <div class="ex-row">
         <span class="ex-lbl">ej:</span>
         <button class="ex-chip" data-type="lineal" data-a="1"    data-b="5" data-sb="-">x−5</button>
@@ -85,34 +80,15 @@
       </div>
     </div>
 
-    <!-- Cuadrática: a·x² ± b·x ± c -->
+    <!-- Cuadrática -->
     <div id="ed-cua" class="ed-block hidden">
-      <div class="coef-row">
-        <button class="sign-btn" id="sga-cua">+</button>
-        <div class="coef-wrap">
-          <span class="coef-lbl">a</span>
-          <button class="step-btn" data-for="a-cua" data-delta="0.5">+</button>
-          <input type="number" id="a-cua" class="coef-in" value="1" step="0.5">
-          <button class="step-btn" data-for="a-cua" data-delta="-0.5">−</button>
-        </div>
-        <span class="op-txt">·x²</span>
-        <button class="sign-btn" id="sg1-cua">+</button>
-        <div class="coef-wrap">
-          <span class="coef-lbl">b</span>
-          <button class="step-btn" data-for="b-cua" data-delta="0.5">+</button>
-          <input type="number" id="b-cua" class="coef-in" value="0" step="0.5">
-          <button class="step-btn" data-for="b-cua" data-delta="-0.5">−</button>
-        </div>
-        <span class="op-txt">·x</span>
-        <button class="sign-btn" id="sg2-cua">+</button>
-        <div class="coef-wrap">
-          <span class="coef-lbl">c</span>
-          <button class="step-btn" data-for="c-cua" data-delta="0.5">+</button>
-          <input type="number" id="c-cua" class="coef-in" value="0" step="0.5">
-          <button class="step-btn" data-for="c-cua" data-delta="-0.5">−</button>
-        </div>
+      <div class="coef-btns-row">
+        <button class="coef-btn" data-coef="a-cua" id="cbt-a-cua">a = 1</button>
+        <span class="op-txt-sm">·x²</span>
+        <button class="coef-btn" data-coef="b-cua" id="cbt-b-cua">+ b = 0</button>
+        <span class="op-txt-sm">·x</span>
+        <button class="coef-btn" data-coef="c-cua" id="cbt-c-cua">+ c = 0</button>
       </div>
-      <div class="preview-box" id="prev-cua"></div>
       <div class="ex-row">
         <span class="ex-lbl">ej:</span>
         <button class="ex-chip" data-type="cuadratica" data-a="-0.05" data-b="1"   data-sb="+" data-c="0" data-sc="+">−0.05x²+x</button>
@@ -121,25 +97,13 @@
       </div>
     </div>
 
-    <!-- Exponencial: a^x ± c -->
+    <!-- Exponencial -->
     <div id="ed-exp" class="ed-block hidden">
-      <div class="coef-row">
-        <div class="coef-wrap">
-          <span class="coef-lbl">a</span>
-          <button class="step-btn" data-for="a-exp" data-delta="0.5">+</button>
-          <input type="number" id="a-exp" class="coef-in" value="2" step="0.5" min="0.1">
-          <button class="step-btn" data-for="a-exp" data-delta="-0.5">−</button>
-        </div>
-        <span class="op-txt">^x</span>
-        <button class="sign-btn" id="sg-exp">+</button>
-        <div class="coef-wrap">
-          <span class="coef-lbl">c</span>
-          <button class="step-btn" data-for="c-exp" data-delta="0.5">+</button>
-          <input type="number" id="c-exp" class="coef-in" value="0" step="0.1">
-          <button class="step-btn" data-for="c-exp" data-delta="-0.5">−</button>
-        </div>
+      <div class="coef-btns-row">
+        <button class="coef-btn" data-coef="a-exp" id="cbt-a-exp">a = 2</button>
+        <span class="op-txt-sm">^x</span>
+        <button class="coef-btn" data-coef="c-exp" id="cbt-c-exp">+ c = 0</button>
       </div>
-      <div class="preview-box" id="prev-exp"></div>
       <div class="ex-row">
         <span class="ex-lbl">ej:</span>
         <button class="ex-chip" data-type="exponencial" data-a="1.2"  data-c="7" data-sc="-">1.2ˣ−7</button>
@@ -150,11 +114,10 @@
 
   </div><!-- /struct-editors -->
 
-  <!-- Editor fórmula propia (texto libre) -->
+  <!-- Editor fórmula propia -->
   <div id="custom-editor" class="hidden">
     <input type="text" id="custom-input" class="custom-in"
            placeholder="Ej: 2*x + 3" autocomplete="off" spellcheck="false" inputmode="text">
-    <div class="preview-box" id="prev-custom"></div>
     <div id="custom-err" class="err-lbl hidden">Fórmula inválida</div>
   </div>
 
@@ -167,10 +130,44 @@
 
 </div><!-- /panel -->
 
+<!-- Popup de coeficiente (posición fija) -->
+<div id="coef-popup" class="coef-popup hidden">
+  <div class="popup-header">
+    <span id="popup-lbl">A</span>
+    <button id="popup-close" class="popup-close-btn">✕</button>
+  </div>
+  <div class="popup-value-row">
+    <button id="popup-minus" class="popup-step-btn">−</button>
+    <input type="number" id="popup-val-input" class="popup-val-input"
+           step="0.01" inputmode="decimal" autocomplete="off">
+    <button id="popup-plus"  class="popup-step-btn">+</button>
+  </div>
+</div>
+
 <!-- ── OVERLAYS ── -->
 
+<!-- Introducción al juego (primera vez) -->
+<div id="game-intro-overlay" class="overlay">
+  <div class="card intro-card">
+    <div class="intro-icon">🚀</div>
+    <div class="card-title">Batalla contra la IA</div>
+    <div class="card-desc">
+      La IA ha desplegado enemigos en el campo. Tu misión: destruirlos usando
+      <strong>funciones matemáticas</strong>. Ajusta los parámetros para que
+      el misil pase exactamente por cada objetivo.
+    </div>
+    <div class="intro-steps">
+      <div class="intro-step"><span class="step-num">1</span>Elige o ajusta la función</div>
+      <div class="intro-step"><span class="step-num">2</span>Previsualiza la trayectoria</div>
+      <div class="intro-step"><span class="step-num">3</span>Lanza el misil</div>
+    </div>
+    <div class="intro-note">El Nivel 1 es un tutorial. ¡Aprende paso a paso!</div>
+    <button id="btn-game-start" class="btn-primary">¡Comenzar aventura!</button>
+  </div>
+</div>
+
 <!-- Intro de nivel -->
-<div id="intro-overlay" class="overlay">
+<div id="intro-overlay" class="overlay hidden">
   <div class="card">
     <div class="card-eyebrow">Nivel <span id="intro-num">1</span> de 4</div>
     <div class="card-title" id="intro-title">Función Lineal</div>
@@ -189,6 +186,18 @@
     <div class="win-btns">
       <button id="btn-reforzar" class="btn-secondary">Reforzar</button>
       <button id="btn-siguiente" class="btn-primary">Siguiente Nivel ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmación de reinicio -->
+<div id="confirm-overlay" class="overlay hidden">
+  <div class="card confirm-card">
+    <div class="card-title">¿Reiniciar juego?</div>
+    <div class="card-desc">Volverás al Nivel 1 y se perderá todo el progreso.</div>
+    <div class="win-btns">
+      <button id="btn-confirm-no"  class="btn-secondary">Cancelar</button>
+      <button id="btn-confirm-yes" class="btn-primary">Reiniciar</button>
     </div>
   </div>
 </div>
