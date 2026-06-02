@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Batalla IA · Móvil</title>
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="stylesheet" href="lib/katex/katex.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HUD superior -->
+<div id="hud">
+  <div id="hud-left">
+    <span id="hud-level-badge">Nivel 1</span>
+    <span id="hud-level-name">Función Lineal</span>
+  </div>
+  <div id="hud-right">
+    <span id="hud-alive-label">objetivos:</span>
+    <span id="hud-alive">3</span>
+  </div>
+</div>
+
+<!-- Canvas del juego -->
+<canvas id="game-canvas"></canvas>
+
+<!-- Toast de feedback -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- Panel de fórmula -->
+<div id="panel">
+
+  <!-- Tabs de tipo de función (solo nivel 4) -->
+  <div id="type-tabs" class="hidden">
+    <button class="tab-btn active" data-type="lineal">Lineal</button>
+    <button class="tab-btn" data-type="cuadratica">Cuadrática</button>
+    <button class="tab-btn" data-type="exponencial">Exponencial</button>
+  </div>
+
+  <!-- Editors estructurados -->
+  <div id="struct-editors">
+
+    <!-- Lineal: a·x ± b -->
+    <div id="ed-lineal" class="ed-block">
+      <div class="coef-row">
+        <div class="coef-wrap">
+          <span class="coef-lbl">a</span>
+          <input type="number" id="a-lin" class="coef-in" value="1" step="0.5">
+        </div>
+        <span class="op-txt">· x</span>
+        <button class="sign-btn" id="sg-lin">+</button>
+        <div class="coef-wrap">
+          <span class="coef-lbl">b</span>
+          <input type="number" id="b-lin" class="coef-in" value="0" step="0.5">
+        </div>
+      </div>
+      <div class="preview-box" id="prev-lin"></div>
+    </div>
+
+    <!-- Cuadrática: a·x² ± b·x ± c -->
+    <div id="ed-cua" class="ed-block hidden">
+      <div class="coef-row">
+        <div class="coef-wrap">
+          <span class="coef-lbl">a</span>
+          <input type="number" id="a-cua" class="coef-in" value="1" step="0.5">
+        </div>
+        <span class="op-txt">·x²</span>
+        <button class="sign-btn" id="sg1-cua">+</button>
+        <div class="coef-wrap">
+          <span class="coef-lbl">b</span>
+          <input type="number" id="b-cua" class="coef-in" value="0" step="0.5">
+        </div>
+        <span class="op-txt">·x</span>
+        <button class="sign-btn" id="sg2-cua">+</button>
+        <div class="coef-wrap">
+          <span class="coef-lbl">c</span>
+          <input type="number" id="c-cua" class="coef-in" value="0" step="0.5">
+        </div>
+      </div>
+      <div class="preview-box" id="prev-cua"></div>
+    </div>
+
+    <!-- Exponencial: a^x ± c -->
+    <div id="ed-exp" class="ed-block hidden">
+      <div class="coef-row">
+        <div class="coef-wrap">
+          <span class="coef-lbl">a</span>
+          <input type="number" id="a-exp" class="coef-in" value="2" step="0.5" min="0.1">
+        </div>
+        <span class="op-txt">^x</span>
+        <button class="sign-btn" id="sg-exp">+</button>
+        <div class="coef-wrap">
+          <span class="coef-lbl">c</span>
+          <input type="number" id="c-exp" class="coef-in" value="0" step="0.1">
+        </div>
+      </div>
+      <div class="preview-box" id="prev-exp"></div>
+    </div>
+
+  </div><!-- /struct-editors -->
+
+  <!-- Editor fórmula propia (texto libre) -->
+  <div id="custom-editor" class="hidden">
+    <input type="text" id="custom-input" class="custom-in"
+           placeholder="Ej: 2*x + 3" autocomplete="off" spellcheck="false" inputmode="text">
+    <div class="preview-box" id="prev-custom"></div>
+    <div id="custom-err" class="err-lbl hidden">Fórmula inválida</div>
+  </div>
+
+  <!-- Fila inferior: toggle + lanzar -->
+  <div id="bottom-row">
+    <button id="btn-propia" class="btn-sm">✏ Propia</button>
+    <button id="btn-struct" class="btn-sm hidden">⊞ Estructura</button>
+    <button id="btn-launch" class="btn-launch">🚀 Lanzar</button>
+  </div>
+
+</div><!-- /panel -->
+
+<!-- ── OVERLAYS ── -->
+
+<!-- Intro de nivel -->
+<div id="intro-overlay" class="overlay">
+  <div class="card">
+    <div class="card-eyebrow">Nivel <span id="intro-num">1</span> de 4</div>
+    <div class="card-title" id="intro-title">Función Lineal</div>
+    <div class="card-desc" id="intro-desc">Ajusta los coeficientes para impactar cada objetivo.</div>
+    <div class="card-formula" id="intro-formula"></div>
+    <button id="btn-begin" class="btn-primary">¡Comenzar!</button>
+  </div>
+</div>
+
+<!-- Victoria de nivel -->
+<div id="win-overlay" class="overlay hidden">
+  <div class="card win-card">
+    <img src="assets/coronaV.png" class="crown-img" alt="corona">
+    <div class="win-title" id="win-title">¡Venciste el Nivel 1!</div>
+    <div class="win-sub" id="win-sub">Dominas la función lineal</div>
+    <div class="win-btns">
+      <button id="btn-reforzar" class="btn-secondary">Reforzar</button>
+      <button id="btn-siguiente" class="btn-primary">Siguiente Nivel ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="lib/katex/katex.min.js"></script>
+<script src="config.js"></script>
+<script src="estado.js"></script>
+<script src="formulas.js"></script>
+<script src="enemigos.js"></script>
+<script src="dibujo.js"></script>
+<script src="cohete.js"></script>
+<script src="ui.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
