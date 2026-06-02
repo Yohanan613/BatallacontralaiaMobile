@@ -54,9 +54,9 @@ function updateRocket(dt, now) {
   checkSlowMo(now);
   if (checkImpact(now)) return;
 
-  // fuera de pantalla
+  // fuera de rango — derecha por coordenada de mundo, arriba/abajo por píxeles
   const margin = 90;
-  if (r.px > canvas.width + margin || r.py < -margin || r.py > canvas.height + margin) {
+  if (r.t > CFG.WX_MAX + 4 || r.py < -margin || r.py > canvas.height + margin) {
     rocketOOB();
   }
 }
