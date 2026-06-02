@@ -26,16 +26,18 @@ function spawnEnemies(count) {
     counters[type]++;
     const code = et.code + counters[type];
 
-    // X con separación mínima, redondeado a 0.5
+    // X entera con separación mínima de 2
     let wx, tries = 0;
     do {
-      wx = Math.round((5 + Math.random() * 13) * 2) / 2; // 5.0 – 18.0
+      wx = 5 + Math.floor(Math.random() * 14); // enteros 5–18
       tries++;
-    } while (tries < 60 && usedX.some(x => Math.abs(x - wx) < 2.5));
+    } while (tries < 60 && usedX.some(x => Math.abs(x - wx) < 2));
     usedX.push(wx);
 
-    // Y redondeado a 0.5 para que los cálculos sean exactos
-    const wy = Math.round((et.yMin + Math.random() * (et.yMax - et.yMin)) * 2) / 2;
+    // Y entera dentro del rango del tipo
+    const wyMin = Math.ceil(et.yMin);
+    const wyMax = Math.floor(et.yMax);
+    const wy    = wyMin + Math.floor(Math.random() * (wyMax - wyMin + 1));
 
     enemies.push({
       id:        Math.random().toString(36).slice(2),

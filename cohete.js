@@ -44,6 +44,12 @@ function updateRocket(dt, now) {
   r.trail.push({ x: r.px, y: r.py });
   if (r.trail.length > CFG.TRAIL_MAX) r.trail.shift();
 
+  // Si la cámara ya está haciendo zoom, mantener el pivote siguiendo al cohete
+  if (ST.cam.phase === 'zooming') {
+    ST.cam.pivotX = r.px;
+    ST.cam.pivotY = r.py;
+  }
+
   checkSlowMo(now);
   if (checkImpact(now)) return;
 
@@ -87,9 +93,10 @@ function checkImpact(now) {
       if (!isFinite(fy)) continue;
 
       if (Math.abs(fy - e.wy) <= CFG.HIT_TOL) {
-        // ¡Impacto!
+        // ¡Impacto! — explosión en la posición exacta del cruce (no en la pos actual del misil)
+        const hitPos = w2s(e.wx, fy);
         e.alive = false;
-        ST.explosions.push({ x: r.px, y: r.py, t: now, scale: 1.2 });
+        ST.explosions.push({ x: hitPos.x, y: hitPos.y, t: now, scale: 1.2 });
         playSound('exp_' + e.type);
 
         ST.cam.phase      = 'holding';

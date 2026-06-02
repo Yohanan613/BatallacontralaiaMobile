@@ -79,15 +79,16 @@ async function init() {
   initUI();
   startLevel(1);
 
-  // Música de fondo al primer toque (restricción de autoplay)
-  let started = false;
+  // Música de fondo al primer toque (reintenta hasta que el navegador la permita)
   function startMusic() {
-    if (started) return;
-    started = true;
-    SNDS.ambiente && SNDS.ambiente.play().catch(() => {});
+    if (!SNDS.ambiente || !SNDS.ambiente.paused) return;
+    SNDS.ambiente.play().then(() => {
+      document.removeEventListener('touchstart', startMusic);
+      document.removeEventListener('click',      startMusic);
+    }).catch(() => {});
   }
-  document.addEventListener('touchstart', startMusic, { once: true });
-  document.addEventListener('click',      startMusic, { once: true });
+  document.addEventListener('touchstart', startMusic);
+  document.addEventListener('click',      startMusic);
 
   requestAnimationFrame(t => { _lastTime = t; requestAnimationFrame(gameLoop); });
 }

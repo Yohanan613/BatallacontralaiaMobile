@@ -13,7 +13,7 @@ function s2w(sx, sy) {
 function updateLayout() {
   const W  = window.innerWidth;
   const hudH = document.getElementById('hud').offsetHeight || 36;
-  const panelH = Math.max(180, window.innerHeight * 0.36);
+  const panelH = Math.max(165, window.innerHeight * 0.31);
   const H  = Math.max(140, window.innerHeight - hudH - panelH);
 
   canvas.width  = W;
@@ -87,11 +87,11 @@ function drawGrid() {
 
   // Etiquetas X
   ctx.fillStyle  = 'rgba(88,120,160,0.7)';
-  ctx.font       = `${Math.max(8, SC * 0.55)}px monospace`;
+  ctx.font       = `${Math.max(9, SC * 0.65)}px monospace`;
   ctx.textAlign  = 'center';
   for (let wx = 2; wx <= CFG.WX_MAX; wx += 4) {
     const { x, y } = w2s(wx, 0);
-    ctx.fillText(wx, x, y + 11);
+    ctx.fillText(wx, x, y + 12);
   }
   // Etiquetas Y
   ctx.textAlign = 'right';
@@ -172,14 +172,32 @@ function drawEnemies(now) {
 
     // Código
     ctx.fillStyle  = '#38b5ff';
-    ctx.font       = `bold ${Math.max(9, SC * 0.62)}px monospace`;
+    ctx.font       = `bold ${Math.max(10, SC * 0.72)}px monospace`;
     ctx.textAlign  = 'center';
     ctx.fillText(e.code, x, y - drawH / 2 + e.bobOffset - 5);
 
     // Coordenadas
-    ctx.fillStyle = 'rgba(140,190,255,0.65)';
-    ctx.font      = `${Math.max(8, SC * 0.5)}px monospace`;
-    ctx.fillText(`(${e.wx},${e.wy})`, x, y + drawH / 2 + e.bobOffset + 12);
+    ctx.fillStyle = 'rgba(140,190,255,0.75)';
+    ctx.font      = `${Math.max(9, SC * 0.6)}px monospace`;
+    ctx.fillText(`(${e.wx},${e.wy})`, x, y + drawH / 2 + e.bobOffset + 13);
+
+    // Hitbox roja: círculo con radio = tolerancia de impacto
+    ctx.beginPath();
+    ctx.arc(x, y, CFG.HIT_TOL * SC, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,71,87,0.7)';
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Punto amarillo en la posición lógica exacta (sin bob)
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle   = '#FFD700';
+    ctx.shadowBlur  = 10;
+    ctx.shadowColor = '#FFD700';
+    ctx.fill();
+    ctx.shadowBlur  = 0;
   }
 }
 
