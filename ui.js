@@ -1,5 +1,33 @@
 // ui.js — interfaz de usuario, eventos, overlays
 
+// ── Ejemplos de funciones ─────────────────────────────────────
+function applyExample(chip) {
+  const type = chip.dataset.type;
+  if (type === 'lineal') {
+    document.getElementById('a-lin').value = chip.dataset.a;
+    syncSignABtn('sga-lin', 'a-lin');
+    document.getElementById('b-lin').value = chip.dataset.b;
+    ST.signs.lin = chip.dataset.sb;
+    document.getElementById('sg-lin').textContent = chip.dataset.sb;
+  } else if (type === 'cuadratica') {
+    document.getElementById('a-cua').value = chip.dataset.a;
+    syncSignABtn('sga-cua', 'a-cua');
+    document.getElementById('b-cua').value = chip.dataset.b;
+    document.getElementById('c-cua').value = chip.dataset.c;
+    ST.signs.cua1 = chip.dataset.sb;
+    ST.signs.cua2 = chip.dataset.sc;
+    document.getElementById('sg1-cua').textContent = chip.dataset.sb;
+    document.getElementById('sg2-cua').textContent = chip.dataset.sc;
+  } else if (type === 'exponencial') {
+    document.getElementById('a-exp').value = chip.dataset.a;
+    document.getElementById('c-exp').value = chip.dataset.c;
+    ST.signs.exp = chip.dataset.sc;
+    document.getElementById('sg-exp').textContent = chip.dataset.sc;
+  }
+  onStructuredChange();
+  playSound('boton');
+}
+
 // ── KaTeX helper ──────────────────────────────────────────────
 function renderTex(el, tex) {
   if (!el) return;
@@ -27,7 +55,7 @@ function updateHudAlive() {
 
 // ── Trayectoria ───────────────────────────────────────────────
 function recalcTraj() {
-  if (!ST.currentFn) { ST.traj = []; ST.trajHits = []; return; }
+  if (!ST.currentFn || ST.level === 4) { ST.traj = []; ST.trajHits = []; return; }
   const N   = 120;
   const pts = [];
   for (let i = 0; i <= N; i++) {
@@ -70,8 +98,13 @@ function showEditorFor(type) {
 }
 
 // ── Inicializar UI ────────────────────────────────────────────
+function syncSignABtn(btnId, inputId) {
+  const v = parseFloat(document.getElementById(inputId).value) || 0;
+  document.getElementById(btnId).textContent = v < 0 ? '−' : '+';
+}
+
 function initUI() {
-  // Botones de signo
+  // Botones de signo de b/c
   function setupSign(btnId, stateKey) {
     document.getElementById(btnId).addEventListener('click', () => {
       ST.signs[stateKey] = ST.signs[stateKey] === '+' ? '-' : '+';
@@ -84,6 +117,21 @@ function initUI() {
   setupSign('sg1-cua', 'cua1');
   setupSign('sg2-cua', 'cua2');
   setupSign('sg-exp',  'exp');
+
+  // Botones de signo de a (lineal y cuadrática)
+  function setupSignA(btnId, inputId) {
+    document.getElementById(btnId).addEventListener('click', () => {
+      const inp = document.getElementById(inputId);
+      const v   = parseFloat(inp.value) || 1;
+      inp.value = -v;
+      syncSignABtn(btnId, inputId);
+      onStructuredChange();
+      playSound('boton');
+    });
+    document.getElementById(inputId).addEventListener('input', () => syncSignABtn(btnId, inputId));
+  }
+  setupSignA('sga-lin', 'a-lin');
+  setupSignA('sga-cua', 'a-cua');
 
   // Inputs numéricos
   ['a-lin','b-lin','a-cua','b-cua','c-cua','a-exp','c-exp'].forEach(id => {
@@ -172,6 +220,36 @@ function initUI() {
     });
   });
 
+  // Botones de paso ±0.5
+  document.querySelectorAll('.step-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inp   = document.getElementById(btn.dataset.for);
+      const delta = parseFloat(btn.dataset.delta);
+      inp.value   = +((parseFloat(inp.value) || 0) + delta).toFixed(4);
+      inp.dispatchEvent(new Event('input'));
+    });
+  });
+
+  // Chips de ejemplo
+  document.querySelectorAll('.ex-chip').forEach(chip => {
+    chip.addEventListener('click', () => applyExample(chip));
+  });
+
+  // Reinicio con confirmación
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    document.getElementById('confirm-overlay').classList.remove('hidden');
+    playSound('boton');
+  });
+  document.getElementById('btn-confirm-no').addEventListener('click', () => {
+    document.getElementById('confirm-overlay').classList.add('hidden');
+    playSound('boton');
+  });
+  document.getElementById('btn-confirm-yes').addEventListener('click', () => {
+    document.getElementById('confirm-overlay').classList.add('hidden');
+    startLevel(1);
+    playSound('boton');
+  });
+
   // Toque en canvas para ver info de enemigo
   canvas.addEventListener('touchstart', onCanvasTouch, { passive: true });
   canvas.addEventListener('click', onCanvasTouch);
@@ -203,6 +281,10 @@ function showLevelIntro(lvl) {
   renderTex(document.getElementById('intro-formula'), lvl.tex);
   document.getElementById('intro-overlay').classList.remove('hidden');
   document.getElementById('win-overlay').classList.add('hidden');
+
+  if (lvl.id === 4) {
+    setTimeout(() => showToast('🎯 La ruta está oculta — ¡Buena suerte!', 3500), 400);
+  }
 }
 
 // ── Win overlay ───────────────────────────────────────────────
@@ -241,6 +323,8 @@ function startLevel(id) {
   ST.traj        = [];
   ST.trajHits    = [];
   ST.currentFn   = null;
+  ST.nearMisses  = [];
+  ST.nearMissThisLaunch = false;
   ST.cam         = { zoom: 1, targetZoom: 1, pivotX: 0, pivotY: 0, slowMo: 1, phase: 'idle', holdUntil: 0 };
 
   // Resetear modo a estructurado
@@ -270,15 +354,21 @@ function startLevel(id) {
 
   showEditorFor(ST.activeType);
 
-  // Resetear signos visualmente
+  // Resetear signos visualmente (b/c)
   ST.signs = { lin: '+', cua1: '+', cua2: '+', exp: '+' };
   ['sg-lin','sg1-cua','sg2-cua','sg-exp'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '+';
   });
+  // Resetear valor y signo de a
+  document.getElementById('a-lin').value = 1;
+  document.getElementById('a-cua').value = 1;
+  syncSignABtn('sga-lin', 'a-lin');
+  syncSignABtn('sga-cua', 'a-cua');
 
-  // Spawn enemigos
-  ST.enemies = spawnEnemies(lvl.enemigos);
+  // Spawn enemigos (cantidad aleatoria dentro del rango del nivel)
+  const enemyCount = lvl.enemigosMin + Math.floor(Math.random() * (lvl.enemigosMax - lvl.enemigosMin + 1));
+  ST.enemies = spawnEnemies(enemyCount);
   updateHudAlive();
 
   // Botón lanzar

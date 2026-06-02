@@ -62,6 +62,25 @@ body {
 #hud-alive-label { color: var(--text-dim); }
 #hud-alive { font-weight: 800; color: var(--red); font-size: 14px; }
 
+#btn-restart {
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+}
+#btn-restart:active { background: #152540; color: var(--text); }
+
+.confirm-card { max-width: 300px; }
+
 /* ── Canvas ── */
 #game-canvas {
   flex-shrink: 0;
@@ -150,6 +169,24 @@ body {
 
 .op-txt { font-size: 15px; font-weight: 600; color: var(--text-dim); flex-shrink: 0; }
 
+.step-btn {
+  width: 64px;
+  height: 22px;
+  background: #0d1a30;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step-btn:active { background: var(--accent); color: #fff; }
+
 .sign-btn {
   width: 44px;
   height: 44px;
@@ -183,6 +220,38 @@ body {
   overflow: hidden;
 }
 .preview-box .katex { font-size: 0.95em; }
+
+/* ── Ejemplos ── */
+.ex-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ex-lbl {
+  font-size: 10px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ex-chip {
+  padding: 3px 9px;
+  background: rgba(56,181,255,0.07);
+  border: 1px solid rgba(56,181,255,0.28);
+  color: var(--accent);
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: monospace;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  line-height: 1.4;
+}
+.ex-chip:active { background: rgba(56,181,255,0.22); }
 
 /* ── Custom editor ── */
 #custom-editor { display: flex; flex-direction: column; gap: 5px; }

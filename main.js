@@ -8,7 +8,8 @@ async function loadImages() {
     submarino: 'assets/submarino.png',
     cohete:    'assets/cohete.png',
     explosion: 'assets/explosion_spritesheet.png',
-    coronaV:   'assets/coronaV.png'
+    coronaV:   'assets/coronaV.png',
+    sssh:      'assets/sssh.png'
   };
   await Promise.all(Object.entries(defs).map(([k, src]) =>
     new Promise(res => {
@@ -38,11 +39,13 @@ function initSounds() {
   if (SNDS.ambiente) { SNDS.ambiente.loop = true; SNDS.ambiente.volume = 0.25; }
 }
 
+const SOUND_VOL = { missilfly: 0.06 };  // default 0.7; missilfly muy bajo
+
 function playSound(key) {
   const snd = SNDS[key];
   if (!snd) return;
   const clone = snd.cloneNode(false);
-  clone.volume = 0.7;
+  clone.volume = SOUND_VOL[key] ?? 0.7;
   clone.play().catch(() => {});
 }
 

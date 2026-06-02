@@ -16,6 +16,8 @@ const ST = {
   explosions:  [],
   traj:        [],        // puntos de trayectoria [{x,y}|null]
   trajHits:    [],        // índices de enemigos que la trayectoria golpea
+  nearMisses:  [],        // efectos sssh activos [{x,y,t}]
+  nearMissThisLaunch: false,
 
   formulaMode: 'structured',   // 'structured' | 'custom'
   activeType:  'lineal',       // 'lineal' | 'cuadratica' | 'exponencial'

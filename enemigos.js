@@ -1,9 +1,9 @@
 // enemigos.js — definición y spawn de enemigos
 
 const ETYPES = {
-  avion:     { img: 'avion',     code: 'A', yMin:  3.5, yMax:  8.0, drawW: 82 },
-  barco:     { img: 'barco',     code: 'B', yMin: -1.0, yMax:  1.0, drawW: 88 },
-  submarino: { img: 'submarino', code: 'S', yMin: -8.0, yMax: -3.5, drawW: 85 }
+  avion:     { img: 'avion',     code: 'A', yMin:  3.5, yMax:  7.0, drawW: 82 },
+  barco:     { img: 'barco',     code: 'B', yMin: 0, yMax:  0, drawW: 88 },
+  submarino: { img: 'submarino', code: 'S', yMin: -7.0, yMax: -3.5, drawW: 85 }
 };
 
 function spawnEnemies(count) {
@@ -31,7 +31,7 @@ function spawnEnemies(count) {
     do {
       wx = 5 + Math.floor(Math.random() * 14); // enteros 5–18
       tries++;
-    } while (tries < 60 && usedX.some(x => Math.abs(x - wx) < 2));
+    } while (tries < 60 && usedX.some(x => Math.abs(x - wx) < 3));
     usedX.push(wx);
 
     // Y entera dentro del rango del tipo

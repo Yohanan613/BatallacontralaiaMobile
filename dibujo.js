@@ -85,21 +85,35 @@ function drawGrid() {
   const { x: axX } = w2s(0, 0);
   ctx.beginPath(); ctx.moveTo(axX, 0); ctx.lineTo(axX, H); ctx.stroke();
 
-  // Etiquetas X
+  // Etiquetas X (segundos)
   ctx.fillStyle  = 'rgba(88,120,160,0.7)';
   ctx.font       = `${Math.max(9, SC * 0.65)}px monospace`;
   ctx.textAlign  = 'center';
   for (let wx = 2; wx <= CFG.WX_MAX; wx += 4) {
     const { x, y } = w2s(wx, 0);
-    ctx.fillText(wx, x, y + 12);
+    ctx.fillText(wx + 's', x, y + 12);
   }
-  // Etiquetas Y
+  // Etiquetas Y (metros)
   ctx.textAlign = 'right';
   for (let wy = -8; wy <= 8; wy += 2) {
     if (wy === 0) continue;
     const { x, y } = w2s(0, wy);
-    ctx.fillText(wy, x - 3, y + 4);
+    ctx.fillText(wy + 'm', x - 3, y + 4);
   }
+
+  // Nombre del eje X → "segundos"
+  ctx.fillStyle = 'rgba(56,181,255,0.55)';
+  ctx.font      = `italic ${Math.max(9, SC * 0.6)}px sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.fillText('segundos', canvas.width - 4, axY - 5);
+
+  // Nombre del eje Y → "metros"
+  ctx.save();
+  ctx.translate(axX + 12, 14);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'right';
+  ctx.fillText('metros', 0, 0);
+  ctx.restore();
 }
 
 // ── Lanzador ──────────────────────────────────────────────────
@@ -159,7 +173,7 @@ function drawEnemies(now) {
 
     e.bobOffset = Math.sin(now / 640 + e.bobPhase) * 3;
     const { x, y } = w2s(e.wx, e.wy);
-    const drawW = e.et.drawW * (SC / 14);
+    const drawW = e.et.drawW * (SC / 14) * 0.85;
     const drawH = drawW * 0.55;
     const img   = IMGS[e.et.img];
 
@@ -234,6 +248,43 @@ function drawRocket() {
   ctx.restore();
 }
 
+// ── Efecto Near-Miss (¡Sssh!) ─────────────────────────────────
+function drawNearMisses(now) {
+  ST.nearMisses = ST.nearMisses.filter(nm => now - nm.t < 2100);
+  for (const nm of ST.nearMisses) {
+    const age   = now - nm.t;
+    const alpha = Math.max(0, 1 - age / 2100);
+
+    // Sigue al cohete si sigue en vuelo, si no usa la posición guardada
+    const baseX = ST.rocket ? ST.rocket.px : nm.x;
+    const baseY = ST.rocket ? ST.rocket.py : nm.y;
+    const px    = baseX + 48;   // a la derecha del cohete
+    const py    = baseY;
+
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.88;
+
+    const img = IMGS['sssh'];
+    if (img) {
+      const h  = 40 * (SC / 14);
+      const w  = h * (img.naturalWidth / img.naturalHeight);
+      ctx.drawImage(img, px, py - h / 2, w, h);
+    } else {
+      const sz = Math.max(9, SC * 0.55);
+      ctx.font         = `bold ${sz}px sans-serif`;
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.shadowBlur   = 8;
+      ctx.shadowColor  = '#ff9f43';
+      ctx.fillStyle    = '#ff9f43';
+      ctx.fillText('¡Sssh!', px, py);
+      ctx.shadowBlur   = 0;
+    }
+
+    ctx.restore();
+  }
+}
+
 // ── Explosiones ───────────────────────────────────────────────
 function drawExplosions(now) {
   const sheet = IMGS['explosion'];
@@ -288,6 +339,7 @@ function drawFrame(now) {
   drawEnemies(now);
   drawRocket();
   drawExplosions(now);
+  drawNearMisses(now);
 
   if (cam.zoom > 1.001) ctx.restore();
 }

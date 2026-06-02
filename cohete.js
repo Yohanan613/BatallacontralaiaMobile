@@ -4,6 +4,7 @@ function launchRocket() {
   if (ST.phase !== 'playing' || !ST.currentFn) return;
 
   ST.phase = 'launching';
+  ST.nearMissThisLaunch = false;
   document.getElementById('btn-launch').disabled = true;
 
   const origin = w2s(0, 0);
@@ -44,8 +45,8 @@ function updateRocket(dt, now) {
   r.trail.push({ x: r.px, y: r.py });
   if (r.trail.length > CFG.TRAIL_MAX) r.trail.shift();
 
-  // Si la cámara ya está haciendo zoom, mantener el pivote siguiendo al cohete
-  if (ST.cam.phase === 'zooming') {
+  // Mantener el pivote siguiendo al cohete en cualquier fase activa
+  if (ST.cam.phase !== 'idle') {
     ST.cam.pivotX = r.px;
     ST.cam.pivotY = r.py;
   }
@@ -92,8 +93,10 @@ function checkImpact(now) {
       try { fy = r.fn(e.wx); } catch { continue; }
       if (!isFinite(fy)) continue;
 
-      if (Math.abs(fy - e.wy) <= CFG.HIT_TOL) {
-        // ¡Impacto! — explosión en la posición exacta del cruce (no en la pos actual del misil)
+      const miss = Math.abs(fy - e.wy);
+
+      if (miss <= CFG.HIT_TOL) {
+        // ¡Impacto! — explosión en la posición exacta del cruce
         const hitPos = w2s(e.wx, fy);
         e.alive = false;
         ST.explosions.push({ x: hitPos.x, y: hitPos.y, t: now, scale: 1.2 });
@@ -101,15 +104,15 @@ function checkImpact(now) {
 
         ST.cam.phase      = 'holding';
         ST.cam.targetZoom = CFG.ZOOM_MAX;
-        ST.cam.pivotX     = r.px;
-        ST.cam.pivotY     = r.py;
+        ST.cam.pivotX     = hitPos.x;
+        ST.cam.pivotY     = hitPos.y;
         ST.cam.holdUntil  = now + CFG.ZOOM_HOLD_MS;
         ST.cam.slowMo     = 1;
 
         ST.rocket = null;
 
         updateHudAlive();
-        recalcTraj(); // quitar el punto verde del destruido
+        recalcTraj();
 
         setTimeout(() => {
           const alive = ST.enemies.filter(e => e.alive).length;
@@ -122,6 +125,18 @@ function checkImpact(now) {
         }, CFG.ZOOM_HOLD_MS + 80);
 
         return true;
+
+      } else if (miss <= CFG.NEAR_MISS_TOL) {
+        // Near miss — efecto sssh
+        const missPos = w2s(e.wx, fy);
+        ST.nearMisses.push({ x: missPos.x, y: missPos.y, t: now });
+        ST.nearMissThisLaunch = true;
+        // Restaurar velocidad del misil pero mantener zoom un momento antes de salir
+        ST.cam.slowMo     = 1;
+        ST.cam.phase      = 'holding';
+        ST.cam.holdUntil  = now + 520;
+        ST.cam.targetZoom = CFG.ZOOM_MAX;
+        showToast(`¡Sssh! Te pasaste ${miss.toFixed(2)} m del objetivo ${e.code}`, 2500);
       }
     }
   }
@@ -148,11 +163,11 @@ function rocketOOB() {
   ST.cam.targetZoom = 1;
 
   const msg = best < 99
-    ? `Cerca de ${bestCode}: ${best.toFixed(2)} unidades de distancia`
+    ? `Cerca de ${bestCode}: ${best.toFixed(2)} m de distancia`
     : 'Misil fuera de rango';
 
   setTimeout(() => {
-    showToast(msg, 2800);
+    if (!ST.nearMissThisLaunch) showToast(msg, 2800);
     ST.phase = 'playing';
     document.getElementById('btn-launch').disabled = false;
   }, 300);

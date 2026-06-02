@@ -11,7 +11,8 @@ const CFG = {
   ROCKET_SPEED: 7,
 
   // Tolerancia de impacto (unidades de mundo)
-  HIT_TOL: 0.75,
+  HIT_TOL:       0.05,
+  NEAR_MISS_TOL: 0.5,   // rango para mostrar el efecto ¡Sssh!
 
   // Cámara lenta
   SLOW_MO_FACTOR: 0.15,
@@ -27,7 +28,7 @@ const CFG = {
       id: 1,
       tipo: 'lineal',
       nombre: 'Función Lineal',
-      enemigos: 3,
+      enemigosMin: 3, enemigosMax: 3,
       desc: 'Cambia a y b para que el misil pase exactamente por cada objetivo.',
       tex: 'f(x) = a \\cdot x + b'
     },
@@ -35,7 +36,7 @@ const CFG = {
       id: 2,
       tipo: 'cuadratica',
       nombre: 'Función Cuadrática',
-      enemigos: 4,
+      enemigosMin: 3, enemigosMax: 3,
       desc: 'Ajusta a, b y c. La parábola puede alcanzar distintas alturas.',
       tex: 'f(x) = a \\cdot x^2 + b \\cdot x + c'
     },
@@ -43,7 +44,7 @@ const CFG = {
       id: 3,
       tipo: 'exponencial',
       nombre: 'Función Exponencial',
-      enemigos: 4,
+      enemigosMin: 3, enemigosMax: 4,
       desc: 'La base a controla qué tan rápido sube o baja el misil. Ajusta c para moverla.',
       tex: 'f(x) = a^x + c'
     },
@@ -51,7 +52,7 @@ const CFG = {
       id: 4,
       tipo: 'libre',
       nombre: 'Aplica lo Aprendido',
-      enemigos: 5,
+      enemigosMin: 4, enemigosMax: 4,
       desc: '¡Elige la función que mejor se adapte a cada objetivo!',
       tex: 'f(x) = ?'
     }
