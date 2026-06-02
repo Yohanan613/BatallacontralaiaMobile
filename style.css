@@ -114,7 +114,7 @@ body {
   flex: 1;
   background: var(--panel-bg);
   border-top: 2px solid var(--border);
-  padding: 6px 12px 8px;
+  padding: 6px 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -146,17 +146,17 @@ body {
 
 .coef-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 
-.coef-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.coef-wrap { display: flex; flex-direction: column; align-items: center; gap: 1px; }
 
 .coef-lbl { font-size: 10px; color: var(--text-dim); text-transform: uppercase; }
 
 .coef-in {
   width: 64px;
-  height: 44px;
+  height: 36px;
   background: #080f1e;
   border: 1.5px solid var(--border);
   color: var(--accent);
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 700;
   text-align: center;
   border-radius: 8px;
@@ -165,17 +165,17 @@ body {
 }
 .coef-in:focus { border-color: var(--accent); }
 .coef-in::-webkit-inner-spin-button,
-.coef-in::-webkit-outer-spin-button { opacity: 1; height: 44px; }
+.coef-in::-webkit-outer-spin-button { display: none; }
 
 .op-txt { font-size: 15px; font-weight: 600; color: var(--text-dim); flex-shrink: 0; }
 
 .step-btn {
   width: 64px;
-  height: 22px;
+  height: 18px;
   background: #0d1a30;
   border: 1px solid var(--border);
   color: var(--accent);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   border-radius: 4px;
   cursor: pointer;
@@ -190,7 +190,7 @@ body {
 .sign-btn {
   width: 44px;
   height: 44px;
-  margin-top: 14px;
+  margin-top: 22px;
   background: #101e38;
   border: 1.5px solid var(--border);
   color: var(--accent);

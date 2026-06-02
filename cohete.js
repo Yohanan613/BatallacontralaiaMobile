@@ -137,6 +137,11 @@ function checkImpact(now) {
         ST.cam.holdUntil  = now + 520;
         ST.cam.targetZoom = CFG.ZOOM_MAX;
         showToast(`¡Sssh! Te pasaste ${miss.toFixed(2)} m del objetivo ${e.code}`, 2500);
+      } else if (ST.cam.phase === 'zooming') {
+        // Pasó cerca para activar slow-mo pero no lo suficiente para near-miss — salir
+        ST.cam.slowMo     = 1;
+        ST.cam.phase      = 'out';
+        ST.cam.targetZoom = 1;
       }
     }
   }
